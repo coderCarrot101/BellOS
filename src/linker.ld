@@ -1,16 +1,26 @@
-ENTRY(kernel_main)
-OUTPUT_FORMAT("binary")
+ENTRY(_start)
 
 SECTIONS
 {
-    /* The kernel will be loaded to 0x9000 by the bootloader */
+    /* Must match your bootloader's jump address exactly */
     . = 0x9000;
 
     .text : {
+        /* Force the entry object file's code to be placed FIRST */
+        *kernel_entry.o(.text)
         *(.text)
     }
 
-    .rodata : { *(.rodata) }
-    .data   : { *(.data) }
-    .bss    : { *(.bss) }
+    .rodata : {
+        *(.rodata)
+    }
+
+    .data : {
+        *(.data)
+    }
+
+    .bss : {
+        *(.common)
+        *(.bss)
+    }
 }

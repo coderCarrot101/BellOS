@@ -38,13 +38,16 @@ void clear_screen() {
         video_memory[i * 2 + 1] = blank;
     }
     set_cursor_offset(0);
-}\
-
+}
 void kprint (char *message) {
     int char_loc = get_cursor_offset();
     while (*message != '\0') {
         if (*message == '\n') {
             char_loc = (char_loc / 80 + 1) * 80;
+        } else if (*message == '\b') {
+            char_loc--;
+            video_memory[char_loc * 2] = ' ';
+            
         } else {
             video_memory[char_loc * 2] = *message;
             char_loc++;
@@ -55,19 +58,7 @@ void kprint (char *message) {
     set_cursor_offset(char_loc);
 }
 
-void kprintln (char *message) {
+void kprintln(char *message) {
+    kprint(message);
     kprint("\n");
-    int char_loc = get_cursor_offset();
-    while (*message != '\0') {
-        if (*message == '\n') {
-            char_loc = (char_loc / 80 + 1) * 80;
-        } else {
-            video_memory[char_loc * 2] = *message;
-            char_loc++;
-        }
-        message++;
-        
-        
-    }
-    set_cursor_offset(char_loc);
 }

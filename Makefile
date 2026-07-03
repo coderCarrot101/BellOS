@@ -10,10 +10,11 @@ OS_IMAGE=$(BUILD_DIR)/bellos.bin
 # Automatically find all .c files in the source directory
 SRCS=$(wildcard $(SRC_DIR)/*.c)
 
-# Generate a list of corresponding object files in the build directory
-# BUT isolate kernel.o so we can enforce its placement at the front
-OBJS_WITHOUT_KERNEL=$(patsubst $(SRC_DIR)/%.c,$(BUILD_DIR)/%.o,$(filter-out $(SRC_DIR)/kernel.c,$(SRCS)))
-ALL_OBJS=$(BUILD_DIR)/kernel.o $(OBJS_WITHOUT_KERNEL)
+# Generate a list of corresponding C object files
+C_OBJS=$(patsubst $(SRC_DIR)/%.c,$(BUILD_DIR)/%.o,$(SRCS))
+
+# FORCE kernel_entry.o to be the absolute first file evaluated by the linker
+ALL_OBJS=$(BUILD_DIR)/kernel_entry.o $(C_OBJS)
 
 all: $(OS_IMAGE)
 
@@ -22,25 +23,27 @@ $(BUILD_DIR)/boot.bin: $(SRC_DIR)/boot.asm
 	mkdir -p $(BUILD_DIR)
 	$(ASM) -f bin $< -o $@
 
+# Rule to assemble kernel_entry.asm into an ELF object file
+$(BUILD_DIR)/kernel_entry.o: $(SRC_DIR)/kernel_entry.asm
+	mkdir -p $(BUILD_DIR)
+	$(ASM) -f elf32 $< -o $@
+
 # Pattern rule to compile any .c file into a .o file
 $(BUILD_DIR)/%.o: $(SRC_DIR)/%.c
 	mkdir -p $(BUILD_DIR)
 	$(CC) -ffreestanding -m32 -c $< -o $@
 
-# Link the C kernel into a standalone flat binary raw file
-# $(ALL_OBJS) ensures kernel.o is strictly the first file evaluated by the linker
+# Link everything together, ensuring kernel_entry.o sits at the exact start of the binary
 $(BUILD_DIR)/kernel.bin: $(ALL_OBJS)
-	$(LD) -T $(SRC_DIR)/linker.ld -o $@ $(ALL_OBJS) --oformat binary
+	$(LD) -T $(SRC_DIR)/linker.ld -o $@ $(ALL_OBJS) --oformat binary -Map=$(BUILD_DIR)/kernel.map
 
 # GLUE THEM TOGETHER & PAD THE DISK IMAGE
 $(OS_IMAGE): $(BUILD_DIR)/boot.bin $(BUILD_DIR)/kernel.bin
-	# 1. Stitch bootloader and kernel binary together
 	cat $(BUILD_DIR)/boot.bin $(BUILD_DIR)/kernel.bin > $(OS_IMAGE)
-	# 2. Force the disk image to be padded with zeros up to 4 sectors (2048 bytes total)
-	dd if=/dev/zero of=$(OS_IMAGE) bs=1 count=0 seek=2048
+	dd if=/dev/zero of=$(OS_IMAGE) bs=1 count=0 seek=51200
 
 run: $(OS_IMAGE)
-	qemu-system-i386 -drive format=raw,file=$(OS_IMAGE)
+	qemu-system-i386 -drive format=raw,file=$(OS_IMAGE) -k en-us
 
 clean:
 	rm -rf $(BUILD_DIR)
