@@ -5,19 +5,15 @@
 const int SCREEN_SIZE = 80 * 25;
 
 void set_cursor_offset(int offset) {
-    // 4. Reset the hardware blinking cursor to the top-left corner (offset 0)
-    // Register 14 is the Cursor High Byte
     port_byte_out(VGA_CTRL_PORT, 14);
     port_byte_out(VGA_DATA_PORT, (unsigned char)(offset >> 8)); 
 
-    // Register 15 is the Cursor Low Byte
     port_byte_out(VGA_CTRL_PORT, 15);
     port_byte_out(VGA_DATA_PORT, (unsigned char)(offset & 0xFF));
 }
 
 int get_cursor_offset() {
-    // 4. Reset the hardware blinking cursor to the top-left corner (offset 0)
-    // Register 14 is the Cursor High Byte
+
 
     int offset = 0;
 
