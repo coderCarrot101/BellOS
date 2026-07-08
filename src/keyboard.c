@@ -19,8 +19,8 @@ const char scancode_map_shifted[] = {
 };
 unsigned char ascii_char_array[256];
 
-//this is unstable
-char *kscan() {
+//allows user input into the kernal
+char *kscan(unsigned char color) {
     int breaker = 1;
     unsigned char scancode;
     unsigned char *p_ascii_char_array = ascii_char_array;
@@ -34,9 +34,20 @@ char *kscan() {
                 continue;
             }else if (scancode == 0xAA || scancode == 0xB6) {
                 is_shift_pressed = 0;
-                continue; // Shift was let go, nothing to print!
+                continue;
+            }else if (scancode == 0x4B) {
+                set_cursor_offset((get_cursor_offset() - 1));
+                continue;
+            } else if (scancode == 0x4D) {
+                set_cursor_offset((get_cursor_offset() + 1));
+                continue;
+            } else if (scancode == 0x48) {
+                set_cursor_offset((get_cursor_offset() - 80));
+            } else if (scancode == 0x50) {
+                set_cursor_offset((get_cursor_offset() + 80));
             }
             if (scancode <= 0x39) {
+                
                 char ascii_char;
                 if (is_shift_pressed) {
                     ascii_char = scancode_map_shifted[scancode];
@@ -51,12 +62,12 @@ char *kscan() {
                     *p_ascii_char_array--;
                     *p_ascii_char_array =  0;
                     char char_str[2] = {'\b', '\0'};
-                    kprint(char_str);
+                    kprint(char_str, color);
                 } else if (ascii_char != 0) {
                     
                     *p_ascii_char_array = ascii_char;
                     char char_str[2] = {ascii_char, '\0'};
-                    kprint(char_str);
+                    kprint(char_str,color);
                     p_ascii_char_array++;
                 }
             }
@@ -64,9 +75,9 @@ char *kscan() {
     }
 }
 
-
-char *kscanln() {
-    char *out = kscan();
-    kprint("\n");
+//kascan but newlines after
+char *kscanln(unsigned char color) {
+    char *out = kscan(color);
+    kprint("\n", color);
     return out;
 }

@@ -46,4 +46,11 @@
 unsigned char port_byte_in(unsigned short port);
 void port_byte_out(unsigned short port, unsigned char data);
 
+#define COLOR_BLACK  0x00
+#define COLOR_BLUE   0x01
+#define COLOR_GREEN  0x02
+#define COLOR_CYAN   0x03
+#define COLOR_RED    0x04
+#define COLOR_WHITE  0x0F
+
 #endif
