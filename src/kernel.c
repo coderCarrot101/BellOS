@@ -3,14 +3,14 @@
 #include "keyboard.h"
 void display_banner(unsigned char banner_color);
 //REMEMBER TO INCREASE DISK SPACE AS PROGRAM GROWS OTHERWISE STUFF GETS WILD
-
+//TODO: add a print of registers and mem map
 //Kernel enters here!
 void kernel_main() {
     
     clear_screen();
 
     display_banner(0x0D);
-    kprintln("Appreciating Annabella... OK\nBooting to disk... OK\nEntering 32-bit protected mode... OK\nUser input... OK", COLOR_GREEN);
+    kprintln("\nLeave no trace\n\nBooting to disk... OK\nEntering 32-bit protected mode... OK\nUser input... OK", COLOR_GREEN);
     char *input = kscanln(COLOR_GREEN);
     kprintln(input, COLOR_GREEN);
     while(1) {
@@ -21,7 +21,7 @@ void kernel_main() {
 //displays the welcome message in the kernel, mostly for novelty
 void display_banner(unsigned char banner_color) {
 
-
+    kprint(" \n", banner_color);
     kprint(" __      __  _                     _        \n", banner_color);
     kprint(" \\ \\    / /__| |__ ___ _ __  ___  | |_ ___  \n", banner_color);
     kprint("  \\ \\/\\/ / -_) / _/ _ \\ '  \\/ -_) |  _/ _ \\ \n", banner_color);

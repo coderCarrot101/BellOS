@@ -12,6 +12,8 @@
 
 // Holds 8K bytes worth of scroll memory
 unsigned char scrollback_buffer[SCREEN_COLS * TOTAL_ROWS * BYTES_PER_SLOT];
+static int scrollcountmin = 0;
+static int scrollcountmax = 0;
 
 
 #define video_memory ((volatile char*)0xB8000)
@@ -58,6 +60,50 @@ void clear_screen() {
 void kprint (char *message, unsigned char color) {
     char blank = 0x07;
     int char_loc = get_cursor_offset();
+
+    if (char_loc >= SCREEN_SIZE) {
+        for (int i = 80; i < SCREEN_SIZE - 80; i+= 80) {
+            for (int j = i + 80; j > i; j-= 1) {
+
+                video_memory[j * 2] = video_memory[(j+80) * 2];
+                video_memory[(j * 2) + 1] = video_memory[((j+80) * 2) + 1];                     
+            }
+        }
+        for (int i = 1920; i <= 2000; i+= 1) {
+            scrollback_buffer[scrollcountmin * 2] = video_memory[i * 2];
+            scrollback_buffer[scrollcountmin * 2 + 1] = video_memory[i * 2 + 1];
+            scrollcountmin++;
+            video_memory[i * 2] = ' ';
+            video_memory[i * 2 + 1] = blank;
+        }
+        char_loc = 1920;
+        set_cursor_offset(char_loc);
+    }
+    if (char_loc < 10) {
+        for (int i = SCREEN_SIZE; i > 80; i-= 80) {
+            for (int j = i + 80; j > i; j-= 1) {
+
+                video_memory[j * 2] = video_memory[(j-80) * 2];
+                video_memory[(j * 2) + 1] = video_memory[((j-80) * 2) + 1];                     
+            }
+        }
+        if (scrollcountmin > 0) {
+            for (int i = 80; i >= 0; i--) {
+                video_memory[i * 2] = scrollback_buffer[scrollcountmin * 2];
+                video_memory[i * 2 + 1] = scrollback_buffer[scrollcountmin * 2 + 1];
+                scrollcountmin--;
+            }
+        } else {
+            for (int i = 1920; i <= 2000; i+= 1) {
+                video_memory[i * 2] = ' ';
+                video_memory[i * 2 + 1] = blank;
+            }
+        }
+        char_loc = 11;
+        set_cursor_offset(char_loc);
+    }
+
+
     while (*message != '\0') {
         if (*message == '\n') {
             char_loc = (char_loc / 80 + 1) * 80;
@@ -77,17 +123,44 @@ void kprint (char *message, unsigned char color) {
                     video_memory[j * 2] = video_memory[(j+80) * 2];
                     video_memory[(j * 2) + 1] = video_memory[((j+80) * 2) + 1];                     
                 }
-            }//almost there!
+            }
             for (int i = 1920; i <= 2000; i+= 1) {
+                scrollback_buffer[scrollcountmin * 2] = video_memory[i * 2];
+                scrollback_buffer[scrollcountmin * 2 + 1] = video_memory[i * 2 + 1];
+                scrollcountmin++;
                 video_memory[i * 2] = ' ';
                 video_memory[i * 2 + 1] = blank;
             }
             char_loc = 1920;
             set_cursor_offset(char_loc);
         }
+        if (char_loc < 10) {
+            for (int i = SCREEN_SIZE; i > 80; i-= 80) {
+                for (int j = i + 80; j > i; j-= 1) {
+
+                    video_memory[j * 2] = video_memory[(j-80) * 2];
+                    video_memory[(j * 2) + 1] = video_memory[((j-80) * 2) + 1];                     
+                }
+            }
+            if (scrollcountmin > 0) {
+                for (int i = 80; i >= 0; i--) {
+                    video_memory[i * 2] = scrollback_buffer[scrollcountmin * 2];
+                    video_memory[i * 2 + 1] = scrollback_buffer[scrollcountmin * 2 + 1];
+                    scrollcountmin--;
+                }
+            } else {
+                for (int i = 1920; i <= 2000; i+= 1) {
+                    video_memory[i * 2] = ' ';
+                    video_memory[i * 2 + 1] = blank;
+                }
+            }
+            char_loc = 11;
+            set_cursor_offset(char_loc);
+        }
         message++;
         
     }
+    
     set_cursor_offset(char_loc);
 }
 

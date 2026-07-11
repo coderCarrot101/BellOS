@@ -19,7 +19,11 @@ const char scancode_map_shifted[] = {
 };
 unsigned char ascii_char_array[256];
 
-//allows user input into the kernal
+//allows user input into the kernalz
+
+/*
+TODO: add scrollback buffer and change your dumb esc key breaak to enter, and make shift + enter \n
+*/
 char *kscan(unsigned char color) {
     int breaker = 1;
     unsigned char scancode;
@@ -29,21 +33,36 @@ char *kscan(unsigned char color) {
         if (port_byte_in(0x64) & 0x01) {
             
             scancode = port_byte_in(0x60);
+            // Shift pressed
             if (scancode == 0x2A || scancode == 0x36) {
                 is_shift_pressed = 1;
                 continue;
-            }else if (scancode == 0xAA || scancode == 0xB6) {
+            }
+            //Shift released
+            else if (scancode == 0xAA || scancode == 0xB6) {
                 is_shift_pressed = 0;
                 continue;
-            }else if (scancode == 0x4B) {
+            }
+            // Left Arrow
+            else if (scancode == 0x4B) {
+                kprint("", 0x0F);
                 set_cursor_offset((get_cursor_offset() - 1));
                 continue;
-            } else if (scancode == 0x4D) {
+            } 
+            // Right Arrow
+            else if (scancode == 0x4D) {
+                kprint("", 0x0F);
                 set_cursor_offset((get_cursor_offset() + 1));
                 continue;
-            } else if (scancode == 0x48) {
+            } 
+            // Up Arrow
+            else if (scancode == 0x48) {
+                kprint("", 0x0F);
                 set_cursor_offset((get_cursor_offset() - 80));
-            } else if (scancode == 0x50) {
+            } 
+            // Down Arrow
+            else if (scancode == 0x50) {
+                kprint("", 0x0F);
                 set_cursor_offset((get_cursor_offset() + 80));
             }
             if (scancode <= 0x39) {
