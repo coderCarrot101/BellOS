@@ -20,7 +20,8 @@ void kernel_main() {
 
 //displays the welcome message in the kernel, mostly for novelty
 void display_banner(unsigned char banner_color) {
-
+    kprint(" \n", banner_color);
+    kprint(" \n", banner_color);
     kprint(" \n", banner_color);
     kprint(" __      __  _                     _        \n", banner_color);
     kprint(" \\ \\    / /__| |__ ___ _ __  ___  | |_ ___  \n", banner_color);

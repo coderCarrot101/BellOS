@@ -11,7 +11,7 @@ void kprintln(char *message, unsigned char color);
 void set_cursor_offset(int offset);
 int get_cursor_offset();
 void refresh_screen_from_buffer(int current_scroll_row);
-
+void kprint_int(int num, unsigned char color);
 
 
 #endif

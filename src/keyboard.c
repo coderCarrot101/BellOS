@@ -51,19 +51,22 @@ char *kscan(unsigned char color) {
             } 
             // Right Arrow
             else if (scancode == 0x4D) {
-                kprint("", 0x0F);
                 set_cursor_offset((get_cursor_offset() + 1));
+                kprint("", 0x0F);
+                
                 continue;
             } 
             // Up Arrow
             else if (scancode == 0x48) {
-                kprint("", 0x0F);
                 set_cursor_offset((get_cursor_offset() - 80));
+                kprint("", 0x0F);
+                
             } 
             // Down Arrow
             else if (scancode == 0x50) {
-                kprint("", 0x0F);
                 set_cursor_offset((get_cursor_offset() + 80));
+                kprint("", 0x0F);
+                
             }
             if (scancode <= 0x39) {
                 
